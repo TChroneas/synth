@@ -25,6 +25,7 @@ public class HearDAHDSR extends JApplet {
     private UnitOscillator osc;
     private UnitOscillator gatingOsc;
     private EnvelopeDAHDSR dahdsr;
+    private EnvelopeDAHDSR dahdsrLfo;
     private LineOut lineOut;
     private Add add;
 
@@ -36,6 +37,7 @@ public class HearDAHDSR extends JApplet {
         synth.add(gatingOsc=new SineOscillator());
         synth.add(lineOut=new LineOut());
         synth.add(add=new Add());
+        synth.add(dahdsrLfo=new EnvelopeDAHDSR());
         //demo
         synth.add(dahdsr=new EnvelopeDAHDSR());
         dahdsr.output.connect(osc.amplitude);
@@ -44,8 +46,12 @@ public class HearDAHDSR extends JApplet {
         dahdsr.decay.setName("Amp Decay");
         dahdsr.sustain.setName("Amp sustain");
         dahdsr.release.setName("Amp release");
-
-
+        dahdsrLfo.output.connect(gatingOsc.amplitude);
+        dahdsrLfo.attack.setup(0.0,0.0,8);
+        dahdsrLfo.attack.setName("Lfo Attack");
+        dahdsrLfo.decay.setName("Lfo Decay");
+        dahdsrLfo.sustain.setName("Lfo sustain");
+        dahdsrLfo.release.setName("Lfo release");
 
         gatingOsc.output.connect(add.inputA);
         add.output.connect(osc.frequency);
@@ -64,6 +70,13 @@ public class HearDAHDSR extends JApplet {
         osc.amplitude.set(10);
 
         setupPortKnob(gatingOsc.amplitude);
+        setupPortKnob(dahdsr.attack);
+        setupPortKnob(dahdsr.decay);
+        setupPortKnob(dahdsr.sustain);
+        setupPortKnob(dahdsr.release);
+        setupPortKnob(gatingOsc.amplitude);
+
+
         setupPortKnob(dahdsr.attack);
         setupPortKnob(dahdsr.decay);
         setupPortKnob(dahdsr.sustain);

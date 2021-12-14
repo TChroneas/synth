@@ -1,4 +1,7 @@
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 
 import javax.swing.*;
@@ -28,6 +31,8 @@ public class HearDAHDSRb extends JApplet {
     private UnitOscillator gatingOsc;
     private EnvelopeDAHDSR dahdsr;
     private Add add;
+    private EnvelopeDAHDSR dahdsrLfo;
+
     private LineOut lineOut;
     private JButton button;
 
@@ -37,22 +42,41 @@ public class HearDAHDSRb extends JApplet {
 
         // Add a tone generator.
         synth.add(osc = new SineOscillator());
-
-        synth.add(gatingOsc = new SquareOscillator());
+        synth.add(gatingOsc = new SawtoothOscillator());
         synth.add(dahdsr = new EnvelopeDAHDSR());
+        synth.add(dahdsrLfo=new EnvelopeDAHDSR());
         synth.add(lineOut = new LineOut());
         synth.add(add=new Add());
         button=new JButton("play");
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                noteC2MousePressed(evt);
+
+
+        button.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
             }
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                noteC2MouseReleased(evt);
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER&&dahdsr.input.isOff()){
+                    dahdsr.input.on();
+                }
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                dahdsr.input.off();
+
             }
         });
+
         add(button);
+
+        dahdsrLfo.attack.setup(0.001, 0.01, 2.0);
         gatingOsc.output.connect(add.inputA);
+
+
         add.output.connect(osc.frequency);
 
         dahdsr.output.connect(osc.amplitude);
@@ -71,17 +95,30 @@ public class HearDAHDSRb extends JApplet {
         setupPortKnob(dahdsr.decay);
         setupPortKnob(dahdsr.sustain);
         setupPortKnob(dahdsr.release);
-        add.inputB.setup(330,330,500);
+        add.inputB.setup(0,330,900);
         add.inputB.setName("Center Frequency");
         setupPortKnob(add.inputB);
-        gatingOsc.frequency.setup(2.0,2.0,50);
+        gatingOsc.frequency.setup(0,2.0,500);
         gatingOsc.frequency.setName("Modulation Frequency");
         setupPortKnob(gatingOsc.frequency);
 
         gatingOsc.amplitude.setup(0.0,0.0,100);
         gatingOsc.amplitude.setName("Modulation Depth");
+
+
         setupPortKnob(gatingOsc.amplitude);
         validate();
+
+
+
+
+
+
+
+
+
+
+
 
     }
 
@@ -106,13 +143,7 @@ public class HearDAHDSRb extends JApplet {
     public void stop() {
         synth.stop();
     }
-    private void noteC2MouseReleased(MouseEvent evt) {
-        dahdsr.input.off();
-    }
 
-    private void noteC2MousePressed(MouseEvent evt) {
-        dahdsr.input.on();
-    }
 
     /* Can be run as either an application or as an applet. */
     public static void main(String[] args) {
