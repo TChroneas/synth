@@ -10,11 +10,7 @@ import com.jsyn.swing.DoubleBoundedRangeModel;
 import com.jsyn.swing.JAppletFrame;
 import com.jsyn.swing.PortModelFactory;
 import com.jsyn.swing.RotaryTextController;
-import com.jsyn.unitgen.EnvelopeDAHDSR;
-import com.jsyn.unitgen.LineOut;
-import com.jsyn.unitgen.SineOscillator;
-import com.jsyn.unitgen.SquareOscillator;
-import com.jsyn.unitgen.UnitOscillator;
+import com.jsyn.unitgen.*;
 
 /**
  * Play a tone using a JSyn oscillator.
@@ -27,50 +23,74 @@ public class HearDAHDSR extends JApplet {
 
     private Synthesizer synth;
     private UnitOscillator osc;
-    // Use a square wave to trigger the envelope.
     private UnitOscillator gatingOsc;
     private EnvelopeDAHDSR dahdsr;
     private LineOut lineOut;
+    private Add add;
+
 
     @Override
     public void init() {
         synth = JSyn.createSynthesizer();
-
-        // Add a tone generator.
-        synth.add(osc = new SineOscillator());
-        // Add a trigger.
-        synth.add(gatingOsc = new SquareOscillator());
-        // Use an envelope to control the amplitude.
-        synth.add(dahdsr = new EnvelopeDAHDSR());
-        // Add an output mixer.
-        synth.add(lineOut = new LineOut());
-
-        gatingOsc.output.connect(dahdsr.input);
+        synth.add(osc=new TriangleOscillator());
+        synth.add(gatingOsc=new SineOscillator());
+        synth.add(lineOut=new LineOut());
+        synth.add(add=new Add());
+        //demo
+        synth.add(dahdsr=new EnvelopeDAHDSR());
         dahdsr.output.connect(osc.amplitude);
-        dahdsr.attack.setup(0.001, 0.01, 2.0);
-        osc.output.connect(0, lineOut.input, 0);
-        osc.output.connect(0, lineOut.input, 1);
+        dahdsr.attack.setup(0.0,0.0,8);
+        dahdsr.attack.setName("Amp Attack");
+        dahdsr.decay.setName("Amp Decay");
+        dahdsr.sustain.setName("Amp sustain");
+        dahdsr.release.setName("Amp release");
 
-        gatingOsc.frequency.setup(0.001, 0.5, 10.0);
-        gatingOsc.frequency.setName("Rate");
 
-        osc.frequency.setup(50.0, 440.0, 2000.0);
-        osc.frequency.setName("Freq");
 
-        // Arrange the knob in a row.
+        gatingOsc.output.connect(add.inputA);
+        add.output.connect(osc.frequency);
+        osc.output.connect(0,lineOut.input,0);
+        osc.output.connect(0,lineOut.input,1);
         setLayout(new GridLayout(1, 0));
-
-        setupPortKnob(osc.frequency);
+        add.inputB.setup(330,330,500);
+        add.inputB.setName("Center Frequency");
+        setupPortKnob(add.inputB);
+        gatingOsc.frequency.setup(2.0,2.0,50);
+        gatingOsc.frequency.setName("Modulation Frequency");
         setupPortKnob(gatingOsc.frequency);
+
+        gatingOsc.amplitude.setup(0.0,0.0,100);
+        gatingOsc.amplitude.setName("Modulation Depth");
+        osc.amplitude.set(10);
+
+        setupPortKnob(gatingOsc.amplitude);
         setupPortKnob(dahdsr.attack);
-        setupPortKnob(dahdsr.hold);
         setupPortKnob(dahdsr.decay);
         setupPortKnob(dahdsr.sustain);
         setupPortKnob(dahdsr.release);
 
-        validate();
-    }
+        //STOP HERE
 
+
+
+
+
+
+
+
+
+        validate();
+
+
+
+
+
+
+
+
+
+
+    }
     private void setupPortKnob(UnitInputPort port) {
         DoubleBoundedRangeModel model = PortModelFactory.createExponentialModel(port);
         RotaryTextController knob = new RotaryTextController(model, 10);
