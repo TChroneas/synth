@@ -19,7 +19,7 @@ import com.jsyn.unitgen.*;
  *
  * @author Phil Burk (C) 2010 Mobileer Inc
  */
-public class HearDAHDSRc extends JApplet {
+public class HearDAHDSRd extends JApplet {
 
 
     private Synthesizer synth;
@@ -155,7 +155,7 @@ public class HearDAHDSRc extends JApplet {
 
     /* Can be run as either an application or as an applet. */
     public static void main(String[] args) {
-        HearDAHDSRc applet = new HearDAHDSRc();
+        HearDAHDSRd applet = new HearDAHDSRd();
         JAppletFrame frame = new JAppletFrame("Hear DAHDSR Envelope", applet);
         frame.setSize(640, 200);
         frame.setVisible(true);
