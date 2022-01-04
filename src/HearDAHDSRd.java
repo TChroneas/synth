@@ -9,8 +9,10 @@ import javax.swing.*;
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.ports.UnitInputPort;
+import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.swing.*;
 import com.jsyn.unitgen.*;
+import com.softsynth.shared.time.TimeStamp;
 
 
 /**
@@ -19,7 +21,7 @@ import com.jsyn.unitgen.*;
  *
  * @author Phil Burk (C) 2010 Mobileer Inc
  */
-public class HearDAHDSRd extends JApplet {
+public class HearDAHDSRd extends JApplet implements UnitVoice{
 
 
     private Synthesizer synth;
@@ -77,20 +79,12 @@ public class HearDAHDSRd extends JApplet {
 
         dahdsrLfo.attack.setup(0.001, 0.01, 2.0);
         gatingOsc.output.connect(add.inputA);
-
-
         add.output.connect(pitchMod.inputA);
         pitchMod.output.connect(osc.frequency);
         dahdsr.output.connect(osc.amplitude);
         dahdsr.attack.setup(0.001, 0.01, 2.0);
         osc.output.connect(0, lineOut.input, 0);
         osc.output.connect(0, lineOut.input, 1);
-
-
-
-
-
-        // Arrange the knob in a row.
         setLayout(new GridLayout(1, 0));
 
         setupPortKnob(dahdsr.attack);
@@ -160,5 +154,35 @@ public class HearDAHDSRd extends JApplet {
         frame.setSize(640, 200);
         frame.setVisible(true);
         frame.test();
+    }
+
+    @Override
+    public void noteOn(double v, double v1, TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public void noteOff(TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public UnitOutputPort getOutput() {
+        return null;
+    }
+
+    @Override
+    public UnitGenerator getUnitGenerator() {
+        return null;
+    }
+
+    @Override
+    public void setPort(String s, double v, TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public void usePreset(int i) {
+
     }
 }
