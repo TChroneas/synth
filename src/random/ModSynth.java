@@ -1,4 +1,4 @@
-
+package random;
 
 import java.awt.GridLayout;
 

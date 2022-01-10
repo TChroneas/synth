@@ -1,3 +1,5 @@
+package random;
+
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.unitgen.LineOut;

@@ -1,6 +1,7 @@
+package random;
+
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
-import com.jsyn.apps.AboutJSyn;
 import com.jsyn.swing.JAppletFrame;
 import com.jsyn.unitgen.*;
 
@@ -13,6 +14,7 @@ public class Synth extends JApplet {
     public LinearRamp lag;
     public LineOut lineOut;
     private EnvelopeDAHDSR dahdsr;
+
 
     public void init(){
         synth.start();

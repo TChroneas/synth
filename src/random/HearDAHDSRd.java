@@ -1,19 +1,18 @@
-import java.awt.GridLayout;
-import java.awt.event.ActionListener;
+package random;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
 import com.jsyn.ports.UnitInputPort;
-import com.jsyn.swing.DoubleBoundedRangeModel;
-import com.jsyn.swing.JAppletFrame;
-import com.jsyn.swing.PortModelFactory;
-import com.jsyn.swing.RotaryTextController;
+import com.jsyn.ports.UnitOutputPort;
+import com.jsyn.swing.*;
 import com.jsyn.unitgen.*;
+import com.softsynth.shared.time.TimeStamp;
 
 
 /**
@@ -22,7 +21,7 @@ import com.jsyn.unitgen.*;
  *
  * @author Phil Burk (C) 2010 Mobileer Inc
  */
-public class HearDAHDSRb extends JApplet {
+public class HearDAHDSRd extends JApplet implements UnitVoice{
 
 
     private Synthesizer synth;
@@ -32,9 +31,11 @@ public class HearDAHDSRb extends JApplet {
     private EnvelopeDAHDSR dahdsr;
     private Add add;
     private EnvelopeDAHDSR dahdsrLfo;
-
+    private Multiply pitchMod;
     private LineOut lineOut;
     private JButton button;
+    private JButton button2;
+    private SoundTweaker tweaker;
 
     @Override
     public void init() {
@@ -47,7 +48,9 @@ public class HearDAHDSRb extends JApplet {
         synth.add(dahdsrLfo=new EnvelopeDAHDSR());
         synth.add(lineOut = new LineOut());
         synth.add(add=new Add());
+        synth.add(pitchMod=new Multiply());
         button=new JButton("play");
+        button2=new JButton("play2");
 
 
         button.addKeyListener(new KeyListener() {
@@ -71,24 +74,17 @@ public class HearDAHDSRb extends JApplet {
             }
         });
 
+
         add(button);
 
         dahdsrLfo.attack.setup(0.001, 0.01, 2.0);
         gatingOsc.output.connect(add.inputA);
-
-
-        add.output.connect(osc.frequency);
-
+        add.output.connect(pitchMod.inputA);
+        pitchMod.output.connect(osc.frequency);
         dahdsr.output.connect(osc.amplitude);
         dahdsr.attack.setup(0.001, 0.01, 2.0);
         osc.output.connect(0, lineOut.input, 0);
         osc.output.connect(0, lineOut.input, 1);
-
-
-
-
-
-        // Arrange the knob in a row.
         setLayout(new GridLayout(1, 0));
 
         setupPortKnob(dahdsr.attack);
@@ -104,9 +100,15 @@ public class HearDAHDSRb extends JApplet {
 
         gatingOsc.amplitude.setup(0.0,0.0,100);
         gatingOsc.amplitude.setName("Modulation Depth");
+        pitchMod.inputB.setName("PitchMod");
+        pitchMod.inputB.setup(0.2,1,4);
+
 
 
         setupPortKnob(gatingOsc.amplitude);
+        setupPortKnob(pitchMod.inputB);
+        tweaker = new SoundTweaker(synth, "title", osc);
+        add(tweaker, BorderLayout.CENTER);
         validate();
 
 
@@ -147,10 +149,40 @@ public class HearDAHDSRb extends JApplet {
 
     /* Can be run as either an application or as an applet. */
     public static void main(String[] args) {
-        HearDAHDSRb applet = new HearDAHDSRb();
+        HearDAHDSRd applet = new HearDAHDSRd();
         JAppletFrame frame = new JAppletFrame("Hear DAHDSR Envelope", applet);
         frame.setSize(640, 200);
         frame.setVisible(true);
         frame.test();
+    }
+
+    @Override
+    public void noteOn(double v, double v1, TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public void noteOff(TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public UnitOutputPort getOutput() {
+        return null;
+    }
+
+    @Override
+    public UnitGenerator getUnitGenerator() {
+        return null;
+    }
+
+    @Override
+    public void setPort(String s, double v, TimeStamp timeStamp) {
+
+    }
+
+    @Override
+    public void usePreset(int i) {
+
     }
 }

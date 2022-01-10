@@ -1,10 +1,11 @@
+package random;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
+
 import com.jsyn.*;
 import com.jsyn.ports.UnitInputPort;
 import com.jsyn.swing.DoubleBoundedRangeModel;
-import com.jsyn.swing.PortControllerFactory;
 import com.jsyn.swing.PortModelFactory;
 import com.jsyn.swing.RotaryTextController;
 import com.jsyn.unitgen.*;

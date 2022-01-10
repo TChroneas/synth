@@ -1,19 +1,4 @@
-/*
- * Copyright 2009 Phil Burk, Mobileer Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+package project;
 
 
 import java.awt.Component;
@@ -21,14 +6,11 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import com.jsyn.*;
 import com.jsyn.ports.UnitInputPort;
 import com.jsyn.ports.UnitPort;
-import com.jsyn.swing.ASCIIMusicKeyboard;
-import com.jsyn.swing.CustomASCIIKeyboard;
 import com.jsyn.swing.PortControllerFactory;
 import com.jsyn.unitgen.UnitGenerator;
 import com.jsyn.unitgen.UnitSource;
@@ -41,8 +23,25 @@ public class CustomTweaker extends JPanel {
     private UnitSource source;
     private CustomASCIIKeyboard keyboard;
     private Synthesizer synth;
+    private JCheckBox loop;
+    private JTextField beatsToLoop;
+
+    public JTextField getBeatsToLoop() {
+        return beatsToLoop;
+    }
+
+    private JButton focusButton;
+
+
+    public JCheckBox getLoop() {
+        return loop;
+    }
 
     static Logger logger = Logger.getLogger(CustomTweaker.class.getName());
+
+    public JButton getFocusButton() {
+        return focusButton;
+    }
 
     public CustomTweaker(Synthesizer synth, String title, UnitSource source) {
         this.synth = synth;
@@ -57,6 +56,9 @@ public class CustomTweaker extends JPanel {
 
         if (source instanceof Instrument) {
             add(keyboard = createPolyphonicKeyboard());
+            loop=keyboard.getLoopButton();
+            focusButton=keyboard.getFocusButton();
+            beatsToLoop=keyboard.getBeatsToLoop();
         } else if (source instanceof UnitVoice) {
             add(keyboard = createMonophonicKeyboard());
         }

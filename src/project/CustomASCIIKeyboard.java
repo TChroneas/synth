@@ -1,31 +1,11 @@
-/*
- * Copyright 2012 Phil Burk, Mobileer Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.jsyn.swing;
+package project;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashSet;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * Support for playing musical scales on the ASCII keyboard of a computer. Has a Sustain checkbox
@@ -35,9 +15,14 @@ import javax.swing.JPanel;
  */
 @SuppressWarnings("serial")
 public abstract class CustomASCIIKeyboard extends JPanel {
+    public JButton getFocusButton() {
+        return focusButton;
+    }
 
     private final JCheckBox sustainBox;
     private final JButton focusButton;
+    private final JCheckBox loopButton;
+    private JTextField beatsToLoop;
     public static final String PENTATONIC_KEYS = "zxcvbasdfgqwert12345";
     public static final String SEPTATONIC_KEYS = "zxcvbnm,.123asdfghjkl456qwertyuio789";
 
@@ -52,7 +37,19 @@ public abstract class CustomASCIIKeyboard extends JPanel {
     private final HashSet<Integer> pressedKeys = new HashSet<Integer>();
     private final HashSet<Integer> onKeys = new HashSet<Integer>();
 
+    public JCheckBox getLoopButton() {
+        return loopButton;
+    }
+
+    public JTextField getBeatsToLoop() {
+        return beatsToLoop;
+    }
+
     public CustomASCIIKeyboard() {
+        loopButton=new JCheckBox("looper");
+        beatsToLoop=new JTextField(2);
+        add(beatsToLoop);
+        add(loopButton);
         focusButton = new JButton("Click here to play ASCII keys.");
         focusButton.addActionListener(new ActionListener() {
             @Override
@@ -115,7 +112,6 @@ public abstract class CustomASCIIKeyboard extends JPanel {
         sustainBox.addKeyListener(keyListener);
 
         countLabel = new JLabel("0");
-        add(countLabel);
     }
 
     private void noteOffInternal(int idx) {
@@ -132,7 +128,7 @@ public abstract class CustomASCIIKeyboard extends JPanel {
      */
     public int convertIndexToPitch(int keyIndex) {
         int scale[] = {
-                0,1,2,3, 4, 5,6, 7,8, 9,10, 11
+                0,1,2,3,4,5,6,7,8,9,10,11
         };
         int octave = keyIndex / scale.length;
         int idx = keyIndex % scale.length;

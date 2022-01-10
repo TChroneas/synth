@@ -1,3 +1,5 @@
+package project;
+
 import com.jsyn.ports.UnitInputPort;
 import com.jsyn.ports.UnitOutputPort;
 import com.jsyn.unitgen.*;
@@ -22,7 +24,7 @@ public class MainCircuit extends Circuit implements UnitVoice {
 
     public MainCircuit() {
         add(pitchMod=new Multiply());
-        add(osc=new SawtoothOscillatorBL());
+        add(osc=new ImpulseOscillatorBL());
         add(gatingOsc=new SawtoothOscillator());
         add(lfo=new Add());
         add(dahdsr=new EnvelopeDAHDSR());
