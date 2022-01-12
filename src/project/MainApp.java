@@ -6,19 +6,17 @@ import com.jsyn.swing.JAppletFrame;
 import com.jsyn.unitgen.*;
 import com.jsyn.util.PolyphonicInstrument;
 import com.jsyn.util.WaveRecorder;
-import it.sauronsoftware.jave.EncoderException;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
+/** @noinspection ALL*/
 public class MainApp extends JApplet {
     private Synthesizer synth;
     private LineOut lineOut;
@@ -45,10 +43,9 @@ public class MainApp extends JApplet {
     WaveRecorder recorder;
     JCheckBox loopPlay;
     JTextField beatsToLoop;
-    Looper looper;
     JLabel beats;
     JLabel secBeats;
-    WavToMp3 wavToMp3;
+    Sound loop;
 
 
     private static final double BPM_TO_HERTZ_FACTOR=0.0166666666666667;
@@ -83,13 +80,12 @@ public class MainApp extends JApplet {
          metronomeCount=0;
          looperCreated=false;
 
-          wavToMp3=new WavToMp3();
-         tempo=new JTextField("60");
+         tempo=new JTextField("120");
          tempo.setColumns(2);
          minusTempo=new JButton("-");
          plusTempo=new JButton("+");
          beats=new JLabel("4");
-         secBeats=new JLabel("0");
+         secBeats=new JLabel("-1");
          beats.setVisible(false);
          secBeats.setVisible(false);
          beats.setFont(new Font("Serif", Font.PLAIN, 50));
@@ -97,6 +93,9 @@ public class MainApp extends JApplet {
          looperRecord=new JCheckBox("looper");
          looperFile = new File( "src\\project\\looper1.wav" );
          loopPlay=new JCheckBox("play loop");
+
+
+
 
 
 
@@ -128,7 +127,6 @@ public class MainApp extends JApplet {
 
 
 
-
         metronomeBox=new JCheckBox("Metronome");
         metronomeBox.addActionListener(new ActionListener() {
             @Override
@@ -139,6 +137,7 @@ public class MainApp extends JApplet {
                     if(!connected) {
                         tempoOsc.output.connect(metronomeAmp.input);
                         connected=true;
+                        looperRecord.setEnabled(false);
                     }
                 }
                 if(!metronomeBox.isSelected()){
@@ -146,31 +145,27 @@ public class MainApp extends JApplet {
                     tempo.setEditable(true);
                     metronomeAmp.input.disconnectAll();
                     connected=false;
+                    looperRecord.setEnabled(true);
+
                 }
 
             }
         });
-
         loopPlay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // TODO: 12/01/2022 FTIAKSE AN DEN IPARXEI WAV NA LOOPAREI TI NA KANW
                 if(loopPlay.isSelected()){
-                    if(!looperCreated){
-                        looperCreated=true;
-                        looper=new Looper();
-                    }
-                    looper.run();
+                    loop.play();
                 }
 
                 if(!loopPlay.isSelected()){
-                    looper.getPlayer().stop();
+                    loop.stop();
+
 
                 }
             }
         });
-
-
-
         bottom.add(metronomeBox,BorderLayout.SOUTH);
         bottom.add(plusTempo,BorderLayout.SOUTH);
         bottom.add(minusTempo).setSize(50,50);
@@ -178,16 +173,11 @@ public class MainApp extends JApplet {
         bottom.add(loopPlay);
         bottom.add(beats);
         bottom.add(secBeats);
-
-
-
-
         synth.add(lineOut = new LineOut());
         voices=new UnitVoice[MAX_VOICES];
         for(int i=0;i<MAX_VOICES;i++){
             voices[i]=new MainCircuit();
         }
-
         instrument = new PolyphonicInstrument(voices);
         synth.add(instrument);
         instrument.usePreset(0,synth.createTimeStamp());
@@ -196,31 +186,41 @@ public class MainApp extends JApplet {
         focusButton=tweaker.getFocusButton();
         beatsToLoop=tweaker.getBeatsToLoop();
         beatsToLoop.setText("4");
-
         looperRecord.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(looperRecord.isSelected())
                 {
+
+                    int temp=Integer.parseInt(tempo.getText());
+                    int beatsL=Integer.parseInt(beatsToLoop.getText());
+                    double beatTime=60000/temp;
+                    double recTime=beatTime*beatsL;
+                    double beatTimer=beatTime*4;
+                    long longTimer=(long)beatTimer;
+                    long totalTime=(long)beatTimer+(long)beatTime;
+                    looperFile = new File( "src\\project\\looper1.wav" );
                     try {
                         recorder = new WaveRecorder( synth, looperFile );
                     } catch (FileNotFoundException fileNotFoundException) {
                         fileNotFoundException.printStackTrace();
                     }
-                    int temp=Integer.parseInt(tempo.getText());
-                    int beatsL=Integer.parseInt(beatsToLoop.getText());
-                    double beatTime=(double)60/temp;
-                    double recTime=beatTime*beatsL;
-                    double beatTimer=beatTime*4000;
-                    long longTimer=(long)beatTimer;
-                    long totalTime=(long)beatTimer+(long)beatTime;
 
-                    recorder.setMaxRecordingTime(recTime);
-                    beats.setVisible(true);
-                    instrument.getOutput().connect(0,recorder.getInput(),0);
-                    instrument.getOutput().connect(0,recorder.getInput(),1);
+                     beats.setVisible(true);
+                     instrument.getOutput().connect(0, recorder.getInput(), 0);
+                     instrument.getOutput().connect(0, recorder.getInput(), 1);
+
                     focusButton.grabFocus();
                     Timer timer=new Timer();
+
+                    tempoOsc.frequency.set(Integer.parseInt(tempo.getText())*BPM_TO_HERTZ_FACTOR);
+                    tempo.setEditable(false);
+                    metronomeBox.setEnabled(false);
+                    if(!connected) {
+                        tempoOsc.output.connect(metronomeAmp.input);
+                        connected = true;
+                    }
+
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
@@ -232,14 +232,13 @@ public class MainApp extends JApplet {
                             }
                             if(beats.getText().equals("0")){
                                 beats.setText("Recording");
-                                if(!start) {
-                                    recorder.start();
-                                }
                                 if(!secBeats.isVisible()){
                                     secBeats.setVisible(true);
+                                    recorder.start();
                                 }
+
                             }
-                            if(beats.getText().equals("Recording")){
+                            if((beats.getText().equals("Recording"))&&!secBeats.getText().equals("Recording complete")){
 
                                 int secBeatstr=Integer.parseInt(secBeats.getText());
                                 secBeatstr++;
@@ -247,29 +246,31 @@ public class MainApp extends JApplet {
 
 
                             }
+
+                            if((secBeats.getText().equals(beatsToLoop.getText()))&&(!secBeats.getText().equals("Recording complete"))){
+                                metronomeAmp.input.off();
+                                tempo.setEditable(true);
+                                metronomeAmp.input.disconnectAll();
+                                connected=false;
+                                metronomeBox.setEnabled(true);
+                                secBeats.setText("Recording complete");
+
+                                if(secBeats.getText().equals("Recording complete")){
+                                    beats.setText("4");
+                                    secBeats.setText("-1");
+                                    beats.setVisible(false);
+                                    secBeats.setVisible(false);
+                                    recorder.stop();
+                                    timer.cancel();
+                                    looperRecord.setSelected(false);
+                                    Trimmer trimmer=new Trimmer(looperFile,beatsL,temp);
+                                    loop=new Sound("src\\project\\looperFinal.wav",true);
+                                }
+                            }
+
                         }
                     },longTimer/4,longTimer/4);
-
-
-
-
-
-
-
-
                 }
-                if(!looperRecord.isSelected()){
-                    recorder.stop();
-
-
-                    try {
-                            wavToMp3.convert(looperFile);
-                        } catch (EncoderException encoderException) {
-                            encoderException.printStackTrace();
-                    }
-
-                }
-
 
             }
         });
