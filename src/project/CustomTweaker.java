@@ -24,7 +24,13 @@ public class CustomTweaker extends JPanel {
     private CustomASCIIKeyboard keyboard;
     private Synthesizer synth;
     private JCheckBox loop;
+
+    public ArrayList<Component> getSliders() {
+        return sliders;
+    }
+
     private JTextField beatsToLoop;
+    private ArrayList<Component> sliders;
 
     public JTextField getBeatsToLoop() {
         return beatsToLoop;
@@ -50,7 +56,7 @@ public class CustomTweaker extends JPanel {
         setLayout(new GridLayout(0, 2));
 
         UnitGenerator ugen = source.getUnitGenerator();
-        ArrayList<Component> sliders = new ArrayList<Component>();
+         sliders = new ArrayList<Component>();
 
         add(new JLabel(title));
 

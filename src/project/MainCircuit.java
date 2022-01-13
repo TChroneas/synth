@@ -22,15 +22,21 @@ public class MainCircuit extends Circuit implements UnitVoice {
     public UnitInputPort cutoffRange;
     public UnitInputPort Q;
 
-    public MainCircuit() {
+    public UnitOscillator getOsc() {
+        return osc;
+    }
+
+    public MainCircuit(UnitOscillator osci) {
+        this.osc = osci;
         add(pitchMod=new Multiply());
-        add(osc=new SawtoothOscillatorBL());
+        add(osc);
         add(gatingOsc=new SawtoothOscillator());
         add(lfo=new Add());
         add(dahdsr=new EnvelopeDAHDSR());
         add(dahdsrLowPass=new EnvelopeDAHDSR());
         add(lowpass=new FilterLowPass());
         add(cutoffAdd=new Add());
+
         dahdsrLowPass.output.connect(cutoffAdd.inputA);
         gatingOsc.output.connect(lfo.inputA);
         lfo.output.connect(pitchMod.inputA);
@@ -44,7 +50,7 @@ public class MainCircuit extends Circuit implements UnitVoice {
         addPort(cutoff=cutoffAdd.inputB,"Cutoff");
         addPort(cutoffRange=dahdsrLowPass.amplitude,"CutoffRange");
         addPort(Q=lowpass.Q);
-        addPort(gatingOscFreq=gatingOsc.frequency,"Modulation Frequecy");
+        addPort(gatingOscFreq=gatingOsc.frequency,"Modulation Frequency");
         addPort(gatingOscAmp=gatingOsc.amplitude,"Modulation Depth");
         gatingOscFreq.setup(0,0,40);
         gatingOscAmp.setup(0,0,100);
@@ -56,6 +62,7 @@ public class MainCircuit extends Circuit implements UnitVoice {
         cutoffRange.setup(lowpass.frequency);
         dahdsr.setupAutoDisable(this);
     }
+
     @Override
     public void noteOn(double v, double v1, TimeStamp timeStamp) {
         frequency.set(v, timeStamp);
